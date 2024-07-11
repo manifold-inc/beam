@@ -17,7 +17,7 @@ export default function Page(){
   return (
     <>
       <Head>
-        <title>New Post - Beam</title>
+        <title>New Post - Meam</title>
       </Head>
 
       <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">

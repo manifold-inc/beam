@@ -3,7 +3,6 @@ import { ButtonLink } from '@/components/button-link'
 import { MarkdownIcon } from '@/components/icons'
 import { MarkdownEditor } from '@/components/markdown-editor'
 import { TextField } from '@/components/text-field'
-import { useLeaveConfirm } from '@/lib/form'
 import { useEffect } from 'react'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 
@@ -30,7 +29,7 @@ export function PostForm({
       defaultValues,
     })
 
-  useLeaveConfirm({ formState })
+  //useLeaveConfirm({ formState })
 
   const { isSubmitSuccessful } = formState
 
@@ -41,7 +40,7 @@ export function PostForm({
   }, [isSubmitSuccessful, reset, getValues])
 
   return (
-    <form onSubmit={void handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <TextField
         {...register('title', { required: true })}
         label="Title"
@@ -60,7 +59,7 @@ export function PostForm({
               label="Post"
               value={field.value}
               onChange={field.onChange}
-              onTriggerSubmit={void handleSubmit(onSubmit)}
+              onTriggerSubmit={handleSubmit(onSubmit)}
               required
             />
           )}

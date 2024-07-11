@@ -13,6 +13,11 @@
     "plugin:@typescript-eslint/stylistic-type-checked"
   ],
   "rules": {
+    "@typescript-eslint/no-misused-promises": [2, {
+      "checksVoidReturn": {
+        "attributes": false
+      }
+    }],
     "drizzle/enforce-delete-with-where": [
       "error",
       {

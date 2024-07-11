@@ -21,14 +21,10 @@ export const ourFileRouter = {
       // Whatever is returned here is accessible in onUploadComplete as `metadata`
       return { userId: user.user.id };
     })
-    .onUploadComplete(async ({ metadata, file }) => {
+    .onUploadComplete(({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
       console.log("file url", file.url);
-      await db.update(User)
-        .set({ image: file.url })
-        .where(eq(User.id, metadata.userId))
- 
       // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
       return file
     }),

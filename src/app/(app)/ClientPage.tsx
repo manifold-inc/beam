@@ -4,7 +4,7 @@ import type { PostSummaryProps } from '@/components/post-summary'
 import { PostSummarySkeleton } from '@/components/post-summary-skeleton'
 import { User } from 'lucia'
 import dynamic from 'next/dynamic'
-import { useRouter } from 'next/router'
+import { useSearchParams } from 'next/navigation'
 import { reactClient } from 'trpc/react'
 
 const PostSummary = dynamic<PostSummaryProps>(
@@ -15,8 +15,8 @@ const PostSummary = dynamic<PostSummaryProps>(
 const POSTS_PER_PAGE = 20
 
 export default function ClientPage({ user }: { user: User }) {
-  const router = useRouter()
-  const currentPageNumber = router.query.page ? Number(router.query.page) : 1
+  const params = useSearchParams()
+  const currentPageNumber = Number(params.get('page') ?? 1)
   const utils = reactClient.useUtils()
   const feedQueryInput = getQueryPaginationInput(
     POSTS_PER_PAGE,
@@ -64,9 +64,7 @@ export default function ClientPage({ user }: { user: User }) {
             post.id === unlikedPostId
               ? {
                 ...post,
-                likedBy: post.likedBy.filter(
-                  (item) => item.id !== user.id
-                ),
+                likedBy: post.likedBy.filter((item) => item.id !== user.id),
               }
               : post
           ),

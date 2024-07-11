@@ -4,13 +4,12 @@ import { classNames } from '@/lib/classnames'
 import {
   getSuggestionData,
   uploadImageCommandHandler,
-  markdownToHtml,
 } from '@/lib/editor'
 import { Field, Label, Switch } from '@headlessui/react'
 import { matchSorter } from 'match-sorter'
 import { useEffect, useReducer, useRef, useState } from 'react'
 import { useDetectClickOutside } from 'react-detect-click-outside'
-import { useQuery } from 'react-query'
+import { useQuery } from '@tanstack/react-query'
 import TextareaAutosize, {
   TextareaAutosizeProps,
 } from 'react-textarea-autosize'
@@ -18,6 +17,7 @@ import getCaretCoordinates from 'textarea-caret'
 import TextareaMarkdown, { TextareaMarkdownRef } from 'textarea-markdown-editor'
 import { reactClient } from 'trpc/react'
 import { ItemOptions, useItemList } from 'use-item-list'
+import { markdownToHtml } from '@/server/utils'
 
 type MarkdownEditorProps = {
   label?: string
@@ -351,8 +351,7 @@ function Suggestion({
   const isMentionType = state.type === 'mention'
   const isEmojiType = state.type === 'emoji'
 
-  const emojiListQuery = useQuery(
-    'emojiList',
+  const emojiListQuery = useQuery(['gemoji'],
     async () => {
       const gemoji = (await import('gemoji')).gemoji
       return gemoji

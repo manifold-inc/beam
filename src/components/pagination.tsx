@@ -1,6 +1,7 @@
 import { ButtonLink } from '@/components/button-link'
 import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
-import { useRouter } from 'next/router'
+import { usePathname, useSearchParams } from 'next/navigation'
+import { useCallback } from 'react'
 
 interface PaginationProps {
   itemCount: number
@@ -26,21 +27,28 @@ export function Pagination({
   itemsPerPage,
   currentPageNumber,
 }: PaginationProps) {
-  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const totalPages = Math.ceil(itemCount / itemsPerPage)
+
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set(name, value)
+ 
+      return params.toString()
+    },
+    [searchParams]
+  )
 
   if (totalPages <= 1) {
     return null
   }
-
   return (
     <div className="flex justify-center gap-4 mt-12">
       <ButtonLink
-        href={{
-          pathname: router.pathname,
-          query: { ...router.query, page: currentPageNumber - 1 },
-        }}
+        href={pathname + '?' + createQueryString('page', (currentPageNumber - 1).toString())}
         variant="secondary"
         className={
           currentPageNumber === 1 ? 'pointer-events-none opacity-50' : ''
@@ -52,10 +60,7 @@ export function Pagination({
         Newer posts
       </ButtonLink>
       <ButtonLink
-        href={{
-          pathname: router.pathname,
-          query: { ...router.query, page: currentPageNumber + 1 },
-        }}
+        href={pathname + '?' + createQueryString('page', (currentPageNumber + 1).toString())}
         variant="secondary"
         className={
           currentPageNumber === totalPages

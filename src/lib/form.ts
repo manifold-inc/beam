@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router'
 import { useCallback, useEffect } from 'react'
 import { useBeforeunload } from 'react-beforeunload'
 import { FormState, type FieldValues } from 'react-hook-form'
@@ -14,31 +13,27 @@ export function useLeaveConfirm<T extends FieldValues>({
   formState,
   message = defaultMessage,
 }: Props<T>) {
-  const Router = useRouter()
-
   const { isDirty } = formState
 
   const onRouteChangeStart = useCallback(() => {
-    if (isDirty) {
-      if (window.confirm(message)) {
-        return true
-      }
-      throw "Abort route change by user's confirmation."
+    if (!isDirty) return
+    if (window.confirm(message)) {
+      return true
     }
+    throw "Abort route change by user's confirmation."
   }, [isDirty, message])
 
   useEffect(() => {
-    Router.events.on('routeChangeStart', onRouteChangeStart)
+    addEventListener('beforeunload', onRouteChangeStart)
 
     return () => {
-      Router.events.off('routeChangeStart', onRouteChangeStart)
+      removeEventListener('beforeunload', onRouteChangeStart)
     }
-  }, [Router.events, onRouteChangeStart])
+  }, [onRouteChangeStart])
 
   useBeforeunload((event) => {
-    if (isDirty) {
-      event.preventDefault()
-    }
+    if (!isDirty) return
+    event.preventDefault()
   })
 
   return

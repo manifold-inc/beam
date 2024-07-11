@@ -1,6 +1,5 @@
-import { sha1 } from 'crypto-hash'
-import type { NextApiRequest, NextApiResponse } from 'next'
-
+import { NextRequest, NextResponse } from 'next/server'
+import crypto from 'crypto'
 const COLOR_NAMES = [
   'red',
   'orange',
@@ -54,8 +53,10 @@ const COLORS: Record<
   },
 }
 
-async function generateSVG(name: string) {
-  const hash = await sha1(name)
+function generateSVG(name: string) {
+  const shasum = crypto.createHash('sha1')
+  shasum.update(name)
+  const hash = shasum.digest('hex')
 
   const colors = [...Array<unknown>(3)].map((_, idx) => {
     const colorHash = hash.slice(idx * 2, idx * 2 + 2)
@@ -85,27 +86,26 @@ async function generateSVG(name: string) {
   return svg
 }
 
-export async function GET(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { name } = req.query
+export function GET(req: NextRequest) {
+  const name = req.nextUrl.searchParams.get('name')
 
   if (name == null || typeof name !== 'string') {
-    return res.status(400).json({ error: 'Invalid request' })
+    return NextResponse.json({ error: '' }, { status: 400 })
   }
 
   try {
-    const svg = await generateSVG(name)
-
-    res.setHeader('Content-Type', 'image/svg+xml')
-    res.setHeader(
+    const svg = generateSVG(name)
+    const res = new NextResponse(svg, { status: 200 })
+    res.headers.set('Content-Type', 'image/svg+xml')
+    res.headers.set(
       'Cache-Control',
       `public, immutable, no-transform, s-maxage=31536000, max-age=31536000`
     )
-    res.statusCode = 200
-    res.send(svg)
+    return res
   } catch (error: unknown) {
-    return res.status(500).json({ message: (error as {message: string}).message })
+    return NextResponse.json(
+      { message: (error as { message: string }).message },
+      { status: 500 }
+    )
   }
 }

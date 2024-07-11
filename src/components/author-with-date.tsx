@@ -11,22 +11,20 @@ interface AuthorWithDateProps {
 export function AuthorWithDate({ author, date }: AuthorWithDateProps) {
   return (
     <div className="flex items-center gap-2 sm:gap-4">
-      <Link href={`/profile/${author.id}`}>
-        <a className="relative inline-flex">
-          <span className="hidden sm:flex">
-            <Avatar name={author.name!} src={author.image} />
-          </span>
-          <span className="flex sm:hidden">
-            <Avatar name={author.name!} src={author.image} size="sm" />
-          </span>
-        </a>
+      <Link className="relative inline-flex" href={`/profile/${author.id}`}>
+        <span className="hidden sm:flex">
+          <Avatar name={author.name!} src={author.image} />
+        </span>
+        <span className="flex sm:hidden">
+          <Avatar name={author.name!} src={author.image} size="sm" />
+        </span>
       </Link>
       <div className="flex-1 text-sm sm:text-base">
         <div>
-          <Link href={`/profile/${author.id}`}>
-            <a className="font-medium tracking-tight transition-colors hover:text-blue">
+          <Link
+            className="font-medium tracking-tight transition-colors hover:text-blue"
+          href={`/profile/${author.id}`}>
               {author.name}
-            </a>
           </Link>
         </div>
 

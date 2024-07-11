@@ -441,7 +441,7 @@ function AddCommentForm({ postId }: { postId: number }) {
   }
 
   return (
-    <form className="flex-1" onSubmit={void handleSubmit(onSubmit)}>
+    <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
       <Controller
         name="content"
         control={control}
@@ -451,7 +451,7 @@ function AddCommentForm({ postId }: { postId: number }) {
             key={markdownEditorKey}
             value={field.value}
             onChange={field.onChange}
-            onTriggerSubmit={void handleSubmit(onSubmit)}
+            onTriggerSubmit={handleSubmit(onSubmit)}
             required
             placeholder="Comment"
             minRows={4}
@@ -510,7 +510,7 @@ function EditCommentForm({
   }
 
   return (
-    <form className="flex-1" onSubmit={void handleSubmit(onSubmit)}>
+    <form className="flex-1" onSubmit={handleSubmit(onSubmit)}>
       <Controller
         name="content"
         control={control}
@@ -519,7 +519,7 @@ function EditCommentForm({
           <MarkdownEditor
             value={field.value}
             onChange={field.onChange}
-            onTriggerSubmit={void handleSubmit(onSubmit)}
+            onTriggerSubmit={handleSubmit(onSubmit)}
             required
             placeholder="Comment"
             minRows={4}

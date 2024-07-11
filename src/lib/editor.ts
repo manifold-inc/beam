@@ -1,12 +1,7 @@
+'use client'
 import { uploadFiles } from '@/server/uploadthing'
-import DOMPurify from 'isomorphic-dompurify'
-import { marked } from 'marked'
 import {toast} from 'sonner'
 import { Cursor } from 'textarea-markdown-editor'
-
-export function markdownToHtml(markdown: string) {
-  return DOMPurify.sanitize(marked.parse(markdown, { breaks: true }) as string)
-}
 
 function replacePlaceholder(
   cursor: Cursor,

@@ -20,7 +20,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { PropsWithChildren, useState } from 'react'
 
-export function Layout({ children, user }: {user: User} & PropsWithChildren) {
+export function Layout({ children, user }: { user: User } & PropsWithChildren) {
   const { theme, themes, setTheme } = useTheme()
   const router = useRouter()
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false)
@@ -29,9 +29,7 @@ export function Layout({ children, user }: {user: User} & PropsWithChildren) {
     <div className="max-w-3xl px-6 mx-auto">
       <header className="flex items-center justify-between gap-4 py-12 md:py-20">
         <Link href="/">
-          <a>
-            <Logo className="w-auto text-red-light h-[34px]" />
-          </a>
+          <Logo className="w-auto text-red-light h-[34px]" />
         </Link>
         <div className="flex items-center gap-2 md:gap-4">
           <IconButton
@@ -45,11 +43,7 @@ export function Layout({ children, user }: {user: User} & PropsWithChildren) {
 
           <Menu>
             <MenuButton className="relative inline-flex rounded-full group focus-ring">
-              <Avatar
-                name={user.name}
-                src={user.image}
-                size="sm"
-              />
+              <Avatar name={user.name} src={user.image} size="sm" />
             </MenuButton>
 
             <MenuItems className="w-48">
@@ -57,7 +51,7 @@ export function Layout({ children, user }: {user: User} & PropsWithChildren) {
                 <MenuItemLink href={`/profile/${user.id}`}>
                   Profile
                 </MenuItemLink>
-                <MenuItemButton onClick={() => router.push("/sign-out")}>
+                <MenuItemButton onClick={() => router.push('/sign-out')}>
                   Log out
                 </MenuItemButton>
               </MenuItemsContent>

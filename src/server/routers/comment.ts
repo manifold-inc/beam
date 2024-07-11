@@ -1,9 +1,9 @@
-import { markdownToHtml } from '@/lib/editor'
 import { TRPCError } from '@trpc/server'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { createTRPCRouter, procedure } from '../context'
 import { Comment } from '../schema'
+import { markdownToHtml } from '../utils'
 
 export const commentRouter = createTRPCRouter({
   add: procedure

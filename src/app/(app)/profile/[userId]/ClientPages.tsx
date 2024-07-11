@@ -51,7 +51,7 @@ export function ProfileInfo({
     return (
       <>
         <Head>
-          <title>{profileQuery.data.name} - Beam</title>
+          <title>{profileQuery.data.name} - Meam</title>
         </Head>
 
         <div className="relative flex items-center gap-4 py-8 overflow-hidden">
@@ -160,7 +160,7 @@ export function ProfileFeed({
   profileUserId: string
 }) {
   const params = useSearchParams()
-  const currentPageNumber = Number(params.get('page')) ?? 1
+  const currentPageNumber = Number(params.get('page') ?? 1)
   const utils = reactClient.useUtils()
   const profileFeedInputs = {
     authorId: profileUserId,
@@ -360,7 +360,7 @@ function EditProfileDialog({
 
   return (
     <Dialog isOpen={isOpen} onClose={handleClose}>
-      <form onSubmit={void handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent>
           <DialogTitle>Edit profile</DialogTitle>
           <div className="mt-6 space-y-6">

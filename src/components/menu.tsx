@@ -5,8 +5,8 @@ import {
   MenuButton as HMenuButton,
   Transition,
 } from '@headlessui/react'
-import Link, { LinkProps } from 'next/link'
-import { ComponentPropsWithoutRef, Fragment, ReactNode } from 'react'
+import Link from 'next/link'
+import { Fragment, ReactNode } from 'react'
 
 export function Menu({ children }: { children: ReactNode }) {
   return (
@@ -52,19 +52,7 @@ export function MenuItemsContent({ children }: { children: ReactNode }) {
   return <div className="py-2">{children}</div>
 }
 
-function NextLink({
-  href,
-  children,
-  ...rest
-}: Omit<ComponentPropsWithoutRef<'a'>, 'href'> & LinkProps) {
-  return (
-    <Link href={href}>
-      <a {...rest}>{children}</a>
-    </Link>
-  )
-}
-
-function menuItemClasses({
+export function menuItemClasses({
   active,
   className,
 }: {
@@ -88,14 +76,14 @@ export function MenuItemLink({
   children: ReactNode
 }) {
   return (
-    <HMenuItem>
+    <HMenuItem as='div'>
       {({ focus }) => (
-        <NextLink
+        <Link
           href={href}
           className={menuItemClasses({ active: focus, className })}
         >
           {children}
-        </NextLink>
+        </Link>
       )}
     </HMenuItem>
   )

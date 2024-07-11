@@ -1,10 +1,12 @@
-import { markdownToHtml } from '@/lib/editor'
+import DOMPurify from 'isomorphic-dompurify'
+import { marked } from 'marked'
 import { TRPCError } from '@trpc/server'
-import { and, asc, count, desc, eq, like, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, like, or, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/mysql-core'
 import { z } from 'zod'
 import { createTRPCRouter, procedure } from '../context'
 import { Comment, LikedPosts, Post, User } from '../schema'
+import { markdownToHtml } from '../utils'
 
 export const postRouter = createTRPCRouter({
   feed: procedure
@@ -18,11 +20,14 @@ export const postRouter = createTRPCRouter({
         .optional()
     )
     .query(async ({ ctx, input }) => {
-      let where = and(
-        eq(Post.hidden, false),
-        eq(Post.authorId, input?.authorId ?? '')
-      )
-      if (ctx.user.role === 'ADMIN') where = eq(Post.hidden, false)
+      let where = and(eq(Post.hidden, false))
+      if (input?.authorId)
+        where = and(
+          eq(Post.hidden, false),
+          eq(Post.authorId, input?.authorId ?? '')
+        )
+      if (ctx.user.role === 'ADMIN')
+        where = eq(Post.authorId, input?.authorId ?? '')
 
       const likedby = alias(User, 'likedby')
       const posts = await ctx.db
@@ -37,7 +42,9 @@ export const postRouter = createTRPCRouter({
             name: User.name,
             image: User.image,
           },
-          likedBy: sql<{id: string, name: string}[]>`JSON_ARRAYAGG(JSON_OBJECT('id', ${likedby.id}, 'name': ${likedby.name}))`,
+          likedBy: sql<
+            { id: string; name: string }[]
+          >`JSON_ARRAYAGG(JSON_OBJECT('id', ${likedby.id}, 'name',${likedby.name}))`,
           comments: count(Comment.id),
         })
         .from(Post)
@@ -48,7 +55,7 @@ export const postRouter = createTRPCRouter({
         .leftJoin(Comment, eq(Post.id, Comment.postId))
         .orderBy(desc(Post.createdAt))
         .groupBy(Post.id)
-        .limit(50)
+        .limit(input?.take ?? 20)
         .offset(input?.skip ?? 0)
       const [{ count: postCount }] = await ctx.db
         .select({ count: count() })
@@ -111,7 +118,10 @@ export const postRouter = createTRPCRouter({
 
       const postBelongsToUser = post?.author.id === ctx.user.id
 
-      if (!post || (post.hidden && !postBelongsToUser && ctx.user.role !== 'ADMIN')) {
+      if (
+        !post ||
+        (post.hidden && !postBelongsToUser && ctx.user.role !== 'ADMIN')
+      ) {
         throw new TRPCError({
           code: 'NOT_FOUND',
           message: `No post with id '${input.id}'`,
@@ -133,8 +143,10 @@ export const postRouter = createTRPCRouter({
         .where(
           and(
             eq(Post.hidden, false),
-            like(Post.title, '%' + input.query + '%'),
-            like(Post.content, '%' + input.query + '%')
+            or(
+              like(Post.title, '%' + input.query + '%'),
+              like(Post.content, '%' + input.query + '%')
+            )
           )
         )
         .limit(10)
@@ -151,7 +163,9 @@ export const postRouter = createTRPCRouter({
       const post = await ctx.db.insert(Post).values({
         title: input.title,
         content: input.content,
-        contentHtml: markdownToHtml(input.content),
+        contentHtml: DOMPurify.sanitize(
+          marked.parse(input.content, { breaks: true }) as string
+        ),
         authorId: ctx.user.id,
       })
 

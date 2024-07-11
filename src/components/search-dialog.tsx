@@ -1,11 +1,12 @@
 import { SearchIcon, SpinnerIcon } from '@/components/icons'
 import { classNames } from '@/lib/classnames'
 import { AppRouter } from '@/server/routers/_app'
-import { Dialog, Transition } from '@headlessui/react'
+import { Dialog, Transition, TransitionChild } from '@headlessui/react'
 import { inferRouterOutputs } from '@trpc/server'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { Fragment, useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ForwardedRef, forwardRef, Fragment, useEffect, useRef, useState } from 'react'
+
 import { reactClient } from 'trpc/react'
 import { useDebounce } from 'use-debounce'
 import { ItemOptions, useItemList } from 'use-item-list'
@@ -41,23 +42,26 @@ function SearchResult({
 
   return (
     <li ref={ref} id={id} onMouseEnter={highlight} onClick={select}>
-      <Link href={`/post/${result.id}`}>
-        <a
-          className={classNames(
-            'block py-3.5 pl-10 pr-3 transition-colors leading-tight',
-            highlighted && 'bg-blue-600 text-white'
-          )}
-        >
-          {result.title}
-        </a>
+      <Link
+        href={`/post/${result.id}`}
+        className={classNames(
+          'block py-3.5 pl-10 pr-3 transition-colors leading-tight',
+          highlighted && 'bg-blue-600 text-white'
+        )}
+      >
+        {result.title}
       </Link>
     </li>
   )
 }
 
-function SearchField({ onSelect }: { onSelect: () => void }) {
+const SearchField = forwardRef(function SField({
+  onSelect,
+}: {
+  onSelect: () => void
+}, ref: ForwardedRef<HTMLInputElement>) {
   const [value, setValue] = useState('')
-  const [debouncedValue] = useDebounce(value, 1000)
+  const [debouncedValue] = useDebounce(value, 500)
   const router = useRouter()
 
   const feedQuery = reactClient.post.search.useQuery(
@@ -70,7 +74,7 @@ function SearchField({ onSelect }: { onSelect: () => void }) {
   )
 
   const { moveHighlightedItem, selectHighlightedItem, useItem } = useItemList({
-    onSelect: (item: {value: {id: string}}) => {
+    onSelect: (item: { value: { id: string } }) => {
       void router.push(`/post/${item.value.id}`)
       onSelect()
     },
@@ -126,6 +130,7 @@ function SearchField({ onSelect }: { onSelect: () => void }) {
           type="text"
           autoComplete="off"
           autoCorrect="off"
+          ref={ref}
           autoCapitalize="off"
           spellCheck={false}
           placeholder="Search"
@@ -162,18 +167,19 @@ function SearchField({ onSelect }: { onSelect: () => void }) {
       )}
     </div>
   )
-}
+})
 
 export function SearchDialog({ isOpen, onClose }: SearchDialogProps) {
+  const searchRef = useRef<HTMLInputElement>(null)
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment}>
       <Dialog
         as="div"
         className="fixed inset-0 z-10 overflow-y-auto"
         onClose={onClose}
       >
         <div className="min-h-screen px-4 text-center">
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-100"
             enterFrom="opacity-0"
@@ -182,10 +188,10 @@ export function SearchDialog({ isOpen, onClose }: SearchDialogProps) {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay className="fixed inset-0 transition-opacity bg-gray-700 opacity-90 dark:bg-gray-900" />
-          </Transition.Child>
+            <div className="fixed inset-0 transition-opacity bg-gray-700 opacity-90 dark:bg-gray-900" />
+          </TransitionChild>
 
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-100"
             enterFrom="opacity-0 scale-95"
@@ -193,17 +199,18 @@ export function SearchDialog({ isOpen, onClose }: SearchDialogProps) {
             leave="ease-in duration-50"
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
+            afterEnter={() => searchRef.current?.focus()}
           >
             <div className="inline-block w-full max-w-md mt-[10vh] mb-8 overflow-hidden text-left align-middle transition-all transform bg-primary rounded-lg shadow-xl dark:border">
               {isOpen ? (
-                <SearchField onSelect={onClose} />
+                <SearchField ref={searchRef} onSelect={onClose} />
               ) : (
                 <div className="h-12" />
               )}
             </div>
-          </Transition.Child>
+          </TransitionChild>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   )
 }

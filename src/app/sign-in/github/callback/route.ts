@@ -12,6 +12,7 @@ export async function GET(request: Request): Promise<Response> {
   const state = url.searchParams.get('state')
   const storedState = cookies().get('github_oauth_state')?.value ?? null
   if (!code || !state || !storedState || state !== storedState) {
+    console.log({code, state, storedState})
     return new Response(null, {
       status: 400,
     })
@@ -43,7 +44,7 @@ export async function GET(request: Request): Promise<Response> {
       return new Response(null, {
         status: 302,
         headers: {
-          Location: '/loading',
+          Location: '/',
         },
       })
     }
@@ -65,6 +66,7 @@ export async function GET(request: Request): Promise<Response> {
       })
     ).json() as {login: string}[]
 
+    console.log(userOrgs)
     // Not in org
     if (
       !userOrgs.find(
@@ -72,7 +74,7 @@ export async function GET(request: Request): Promise<Response> {
       )
     ) {
       return new Response(null, {
-        status: 401,
+        status: 302,
         headers: {
           Location: '/sign-in',
         },
@@ -96,7 +98,7 @@ export async function GET(request: Request): Promise<Response> {
     return new Response(null, {
       status: 302,
       headers: {
-        Location: '/loading',
+        Location: '/',
       },
     })
   } catch (e) {
