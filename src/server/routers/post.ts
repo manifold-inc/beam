@@ -2,7 +2,6 @@ import DOMPurify from 'isomorphic-dompurify'
 import { marked } from 'marked'
 import { TRPCError } from '@trpc/server'
 import { and, asc, count, desc, eq, like, or, sql } from 'drizzle-orm'
-import { alias } from 'drizzle-orm/mysql-core'
 import { z } from 'zod'
 import { createTRPCRouter, procedure } from '../context'
 import { Comment, LikedPosts, Post, User } from '../schema'
@@ -26,10 +25,11 @@ export const postRouter = createTRPCRouter({
           eq(Post.hidden, false),
           eq(Post.authorId, input?.authorId ?? '')
         )
-      if (ctx.user.role === 'ADMIN')
+      if (ctx.user.role === 'ADMIN' && input?.authorId)
         where = eq(Post.authorId, input?.authorId ?? '')
+      if (ctx.user.role === 'ADMIN' && !input?.authorId)
+        where = sql`true`
 
-      const likedby = alias(User, 'likedby')
       const posts = await ctx.db
         .select({
           id: Post.id,
@@ -43,15 +43,13 @@ export const postRouter = createTRPCRouter({
             image: User.image,
           },
           likedBy: sql<
-            { id: string; name: string }[]
-          >`JSON_ARRAYAGG(JSON_OBJECT('id', ${likedby.id}, 'name',${likedby.name}))`,
+            { id: string; name: string }[] | null
+          >`(SELECT JSON_ARRAYAGG(JSON_OBJECT('id', likedby.id, 'name', likedby.name)) FROM ${LikedPosts} INNER JOIN User as likedby ON likedby.id = ${LikedPosts.userId} WHERE ${LikedPosts.postId} = ${Post.id})`,
           comments: count(Comment.id),
         })
         .from(Post)
         .where(where)
         .innerJoin(User, eq(Post.authorId, User.id))
-        .leftJoin(LikedPosts, eq(LikedPosts.postId, Post.id))
-        .leftJoin(likedby, eq(LikedPosts.userId, likedby.id))
         .leftJoin(Comment, eq(Post.id, Comment.postId))
         .orderBy(desc(Post.createdAt))
         .groupBy(Post.id)

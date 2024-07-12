@@ -113,7 +113,7 @@ const SearchField = forwardRef(function SField({
         <div
           className={classNames(
             'absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none transition-opacity',
-            feedQuery.isLoading ? 'opacity-100' : 'opacity-0'
+            feedQuery.isLoading && debouncedValue.length > 0 ? 'opacity-100' : 'opacity-0'
           )}
         >
           <SpinnerIcon className="w-4 h-4 animate-spin" />
@@ -121,7 +121,7 @@ const SearchField = forwardRef(function SField({
         <div
           className={classNames(
             'absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none transition-opacity',
-            feedQuery.isLoading ? 'opacity-0' : 'opacity-100'
+            feedQuery.isLoading && debouncedValue.length > 0 ? 'opacity-0' : 'opacity-100'
           )}
         >
           <SearchIcon className="w-4 h-4" aria-hidden="true" />

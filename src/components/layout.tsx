@@ -13,7 +13,6 @@ import {
   MenuItemsContent,
 } from '@/components/menu'
 import { SearchDialog } from '@/components/search-dialog'
-import { capitalize } from '@/lib/text'
 import { User } from 'lucia'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
@@ -69,8 +68,8 @@ export function Layout({ children, user }: { user: User } & PropsWithChildren) {
                   className="block w-full py-1.5 text-xs border rounded shadow-sm bg-primary border-secondary"
                 >
                   {themes.map((theme) => (
-                    <option key={theme} value={theme}>
-                      {capitalize(theme)}
+                    <option key={theme} className='capitalize' value={theme}>
+                      {theme}
                     </option>
                   ))}
                 </select>

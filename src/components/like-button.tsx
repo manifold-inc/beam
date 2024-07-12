@@ -1,3 +1,4 @@
+'use client'
 import { Button } from '@/components/button'
 import { HeartFilledIcon, HeartIcon } from '@/components/icons'
 import { classNames } from '@/lib/classnames'

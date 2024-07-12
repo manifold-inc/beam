@@ -40,12 +40,13 @@ import {Fragment, useRef, useState} from 'react'
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import {toast} from 'sonner'
 import { reactClient } from 'trpc/react'
+import { RouterOutputs } from 'trpc/shared'
 
-export function PostPage({id, user}: {id: string, user: User}){
+export function PostPage({id, user, initialData}: {id: string, user: User, initialData: RouterOutputs['post']['detail']}){
   const router = useRouter()
   const utils = reactClient.useUtils()
   const postQueryInput = {id: Number(id)}
-  const postQuery = reactClient.post.detail.useQuery(postQueryInput)
+  const postQuery = reactClient.post.detail.useQuery(postQueryInput, {initialData})
   const likeMutation = reactClient.post.like.useMutation({
     onMutate: async () => {
       await utils.post.detail.cancel(postQueryInput)
@@ -64,6 +65,9 @@ export function PostPage({id, user}: {id: string, user: User}){
 
       return { previousPost }
     },
+    onSuccess: () => {
+      router.refresh()
+    }
   })
   const unlikeMutation = reactClient.post.unlike.useMutation({
     onMutate: async () => {
@@ -82,6 +86,9 @@ export function PostPage({id, user}: {id: string, user: User}){
 
       return { previousPost }
     },
+    onSuccess: () => {
+      router.refresh()
+    }
   })
   const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] =
     useState(false)

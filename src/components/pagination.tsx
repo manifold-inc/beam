@@ -1,3 +1,4 @@
+'use client'
 import { ButtonLink } from '@/components/button-link'
 import { ChevronLeftIcon, ChevronRightIcon } from '@/components/icons'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -7,19 +8,6 @@ interface PaginationProps {
   itemCount: number
   itemsPerPage: number
   currentPageNumber: number
-}
-
-export function getQueryPaginationInput(
-  itemsPerPage: number,
-  currentPageNumber: number
-) {
-  return {
-    take: itemsPerPage,
-    skip:
-      currentPageNumber === 1
-        ? undefined
-        : itemsPerPage * (currentPageNumber - 1),
-  }
 }
 
 export function Pagination({

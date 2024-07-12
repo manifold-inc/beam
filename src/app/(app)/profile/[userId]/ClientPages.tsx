@@ -10,268 +10,104 @@ import {
 } from '@/components/dialog'
 import { IconButton } from '@/components/icon-button'
 import { EditIcon } from '@/components/icons'
-import { getQueryPaginationInput, Pagination } from '@/components/pagination'
-import type { PostSummaryProps } from '@/components/post-summary'
-import { PostSummarySkeleton } from '@/components/post-summary-skeleton'
 import { TextField } from '@/components/text-field'
 import { UploadButton } from '@/server/uploadthing'
-import { User } from 'lucia'
-import dynamic from 'next/dynamic'
 import Head from 'next/head'
-import { useSearchParams } from 'next/navigation'
-import {useState} from 'react'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import {toast} from 'sonner'
+import { toast } from 'sonner'
 import { reactClient } from 'trpc/react'
-
-const PostSummary = dynamic<PostSummaryProps>(
-  () => import('@/components/post-summary').then((mod) => mod.PostSummary),
-  { ssr: false }
-)
-
-const POSTS_PER_PAGE = 20
+import { RouterOutputs } from 'trpc/shared'
 
 export function ProfileInfo({
   user,
-  profileUserId,
+  isSelf,
 }: {
-  user: User
-  profileUserId: string
+  user: RouterOutputs['user']['profile']
+  isSelf: boolean
 }) {
-  const profileQuery = reactClient.user.profile.useQuery({ id: profileUserId })
-
-  const [isEditProfileDialogOpen, setIsEditProfileDialogOpen] =
-    useState(false)
+  const [isEditProfileDialogOpen, setIsEditProfileDialogOpen] = useState(false)
   const [isUpdateAvatarDialogOpen, setIsUpdateAvatarDialogOpen] =
     useState(false)
 
-  if (profileQuery.data) {
-    const profileBelongsToUser = profileQuery.data.id === user.id
-
-    return (
-      <>
-        <Head>
-          <title>{profileQuery.data.name} - Meam</title>
-        </Head>
-
-        <div className="relative flex items-center gap-4 py-8 overflow-hidden">
-          <div className="flex items-center gap-8">
-            {profileBelongsToUser ? (
-              <button
-                type="button"
-                className="relative inline-flex group"
-                onClick={() => {
-                  setIsUpdateAvatarDialogOpen(true)
-                }}
-              >
-                <Avatar
-                  name={profileQuery.data.name!}
-                  src={profileQuery.data.image}
-                  size="lg"
-                />
-                <div className="absolute inset-0 transition-opacity bg-gray-900 rounded-full opacity-0 group-hover:opacity-50" />
-                <div className="absolute inline-flex items-center justify-center transition-opacity -translate-x-1/2 -translate-y-1/2 bg-gray-900 border border-white rounded-full opacity-0 top-1/2 left-1/2 h-9 w-9 group-hover:opacity-100">
-                  <EditIcon className="w-4 h-4 text-white" />
-                </div>
-              </button>
-            ) : (
-              <Avatar
-                name={profileQuery.data.name!}
-                src={profileQuery.data.image}
-                size="lg"
-              />
-            )}
-
-            <div className="flex-1">
-              <h1 className="bg-primary text-2xl font-semibold tracking-tight md:text-3xl">
-                {profileQuery.data.name}
-              </h1>
-              {profileQuery.data.title && (
-                <p className="text-lg tracking-tight text-secondary">
-                  {profileQuery.data.title}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {profileBelongsToUser && (
-            <div className="ml-auto mr-10">
-              <IconButton
-                variant="secondary"
-                onClick={() => {
-                  setIsEditProfileDialogOpen(true)
-                }}
-              >
-                <EditIcon className="w-4 h-4" />
-              </IconButton>
-            </div>
-          )}
-
-          <DotPattern />
-        </div>
-
-        <EditProfileDialog
-          user={{
-            name: profileQuery.data.name!,
-            title: profileQuery.data.title,
-          }}
-          isOpen={isEditProfileDialogOpen}
-          onClose={() => {
-            setIsEditProfileDialogOpen(false)
-          }}
-        />
-
-        <UpdateAvatarDialog
-          key={profileQuery.data.image}
-          user={{
-            name: profileQuery.data.name!,
-            image: profileQuery.data.image,
-          }}
-          isOpen={isUpdateAvatarDialogOpen}
-          onClose={() => {
-            setIsUpdateAvatarDialogOpen(false)
-          }}
-        />
-      </>
-    )
-  }
-
-  if (profileQuery.isError) {
-    return <div>Error: {profileQuery.error.message}</div>
-  }
-
   return (
-    <div className="relative flex items-center gap-8 py-8 overflow-hidden animate-pulse">
-      <div className="w-32 h-32 bg-gray-200 rounded-full dark:bg-gray-700" />
-      <div className="flex-1">
-        <div className="h-8 bg-gray-200 rounded w-60 dark:bg-gray-700" />
-        <div className="w-40 h-5 mt-2 bg-gray-200 rounded dark:bg-gray-700" />
-      </div>
-      <DotPattern />
-    </div>
-  )
-}
+    <>
+      <Head>
+        <title>{user.name} - Meam</title>
+      </Head>
 
-export function ProfileFeed({
-  user,
-  profileUserId,
-}: {
-  user: User
-  profileUserId: string
-}) {
-  const params = useSearchParams()
-  const currentPageNumber = Number(params.get('page') ?? 1)
-  const utils = reactClient.useUtils()
-  const profileFeedInputs = {
-    authorId: profileUserId,
-    ...getQueryPaginationInput(POSTS_PER_PAGE, currentPageNumber),
-  }
-  const profileFeedQuery = reactClient.post.feed.useQuery(profileFeedInputs)
-  const likeMutation = reactClient.post.like.useMutation({
-    onMutate: async (likedPostId) => {
-      await utils.post.feed.cancel(profileFeedInputs)
-
-      const previousQuery = utils.post.feed.getData(profileFeedInputs)
-
-      if (previousQuery) {
-        utils.post.feed.setData(profileFeedInputs, {
-          ...previousQuery,
-          posts: previousQuery.posts.map((post) =>
-            post.id === likedPostId
-              ? {
-                ...post,
-                likedBy: [
-                  ...post.likedBy,
-                  {
-                    id: user.id,
-                    name: user.name,
-                  },
-                ],
-              }
-              : post
-          ),
-        })
-      }
-
-      return { previousQuery }
-    },
-  })
-  const unlikeMutation = reactClient.post.unlike.useMutation({
-    onMutate: async (unlikedPostId) => {
-      await utils.post.feed.cancel(profileFeedInputs)
-
-      const previousQuery = utils.post.feed.getData(profileFeedInputs)
-
-      if (previousQuery) {
-        utils.post.feed.setData(profileFeedInputs, {
-          ...previousQuery,
-          posts: previousQuery.posts.map((post) =>
-            post.id === unlikedPostId
-              ? {
-                ...post,
-                likedBy: post.likedBy.filter((item) => item.id !== user.id),
-              }
-              : post
-          ),
-        })
-      }
-
-      return { previousQuery }
-    },
-  })
-
-  if (profileFeedQuery.data) {
-    return (
-      <>
-        <div className="flow-root mt-28">
-          {profileFeedQuery.data.postCount === 0 ? (
-            <div className="text-center text-secondary border rounded py-20 px-10">
-              This user hasn&apos;t published any posts yet.
-            </div>
+      <div className="relative flex items-center gap-4 py-8 overflow-hidden">
+        <div className="flex items-center gap-8">
+          {isSelf ? (
+            <button
+              type="button"
+              className="relative inline-flex group"
+              onClick={() => {
+                setIsUpdateAvatarDialogOpen(true)
+              }}
+            >
+              <Avatar name={user.name!} src={user.image} size="lg" />
+              <div className="absolute inset-0 transition-opacity bg-gray-900 rounded-full opacity-0 group-hover:opacity-50" />
+              <div className="absolute inline-flex items-center justify-center transition-opacity -translate-x-1/2 -translate-y-1/2 bg-gray-900 border border-white rounded-full opacity-0 top-1/2 left-1/2 h-9 w-9 group-hover:opacity-100">
+                <EditIcon className="w-4 h-4 text-white" />
+              </div>
+            </button>
           ) : (
-            <ul className="-my-12 divide-y divide-primary">
-              {profileFeedQuery.data.posts.map((post) => (
-                <li key={post.id} className="py-10">
-                  <PostSummary
-                    user={user}
-                    hideAuthor
-                    post={post}
-                    onLike={() => {
-                      likeMutation.mutate(post.id)
-                    }}
-                    onUnlike={() => {
-                      unlikeMutation.mutate(post.id)
-                    }}
-                  />
-                </li>
-              ))}
-            </ul>
+            <Avatar name={user.name!} src={user.image} size="lg" />
           )}
+
+          <div className="flex-1">
+            <h1 className="bg-primary text-2xl font-semibold tracking-tight md:text-3xl">
+              {user.name}
+            </h1>
+            {user.title && (
+              <p className="text-lg tracking-tight text-secondary">
+                {user.title}
+              </p>
+            )}
+          </div>
         </div>
 
-        <Pagination
-          itemCount={profileFeedQuery.data.postCount}
-          itemsPerPage={POSTS_PER_PAGE}
-          currentPageNumber={currentPageNumber}
-        />
-      </>
-    )
-  }
+        {isSelf && (
+          <div className="ml-auto mr-10">
+            <IconButton
+              variant="secondary"
+              onClick={() => {
+                setIsEditProfileDialogOpen(true)
+              }}
+            >
+              <EditIcon className="w-4 h-4" />
+            </IconButton>
+          </div>
+        )}
 
-  if (profileFeedQuery.isError) {
-    return <div className="mt-28">Error: {profileFeedQuery.error.message}</div>
-  }
+        <DotPattern />
+      </div>
 
-  return (
-    <div className="flow-root mt-28">
-      <ul className="-my-12 divide-y divide-primary">
-        {[...Array<null>(3)].map((_, idx) => (
-          <li key={idx} className="py-10">
-            <PostSummarySkeleton hideAuthor />
-          </li>
-        ))}
-      </ul>
-    </div>
+      <EditProfileDialog
+        user={{
+          name: user.name!,
+          title: user.title,
+        }}
+        isOpen={isEditProfileDialogOpen}
+        onClose={() => {
+          setIsEditProfileDialogOpen(false)
+        }}
+      />
+
+      <UpdateAvatarDialog
+        key={user.image}
+        user={{
+          name: user.name!,
+          image: user.image,
+        }}
+        isOpen={isUpdateAvatarDialogOpen}
+        onClose={() => {
+          setIsUpdateAvatarDialogOpen(false)
+        }}
+      />
+    </>
   )
 }
 
@@ -404,11 +240,18 @@ function UpdateAvatarDialog({
   onClose: () => void
 }) {
   const [uploadedImage, setUploadedImage] = useState(user.image)
+  const router = useRouter()
 
   function handleClose() {
     onClose()
     setUploadedImage(user.image)
   }
+  const removeAvatar = reactClient.user.removeAvatar.useMutation({
+    onSuccess: () => {
+      router.refresh()
+      handleClose()
+    },
+  })
 
   return (
     <Dialog isOpen={isOpen} onClose={handleClose}>
@@ -423,11 +266,11 @@ function UpdateAvatarDialog({
             <UploadButton
               onClientUploadComplete={() => {
                 handleClose()
-                window.location.reload() 
+                window.location.reload()
               }}
-              onUploadError={e => void toast.error(
-                `Error uploading image: ${e.message}`
-              )}
+              onUploadError={(e) =>
+                void toast.error(`Error uploading image: ${e.message}`)
+              }
               endpoint="userAvatar"
             />
             <p className="mt-2 text-xs text-secondary">4MB max</p>
@@ -453,6 +296,17 @@ function UpdateAvatarDialog({
         </div>
       </DialogContent>
       <DialogActions>
+        {user.image && !uploadedImage && (
+          <Button
+            disabled={removeAvatar.isLoading}
+            variant="primary"
+            onClick={() => {
+              removeAvatar.mutate()
+            }}
+          >
+            Save
+          </Button>
+        )}
         <Button variant="secondary" onClick={handleClose}>
           Cancel
         </Button>

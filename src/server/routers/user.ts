@@ -32,6 +32,13 @@ export const userRouter = createTRPCRouter({
 
       return user
     }),
+  removeAvatar: procedure
+    .mutation(async ({ ctx }) => {
+      await ctx.db
+        .update(User)
+        .set({ image: null })
+        .where(eq(User.id, ctx.user.id))
+    }),
   edit: procedure
     .input(
       z.object({

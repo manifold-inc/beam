@@ -1,4 +1,4 @@
-import { isCharacterALetter } from '@/lib/text'
+import { isCharacterALetter } from '@/server/utils'
 import Image from 'next/image'
 
 type AvatarSize = 'sm' | 'md' | 'lg'
@@ -31,7 +31,6 @@ export function Avatar({ size = 'md', name, src }: AvatarProps) {
           <Image
             src={src}
             alt={name}
-            layout="fixed"
             width={dimension[size]}
             height={dimension[size]}
             className="object-cover rounded-full"

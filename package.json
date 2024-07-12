@@ -32,6 +32,7 @@
     "eslint": "^8.47.0",
     "eslint-plugin-drizzle": "^0.2.3",
     "gemoji": "^8.1.0",
+    "happy-dom": "^14.12.3",
     "isomorphic-dompurify": "^0.18.0",
     "lucia": "^3.2.0",
     "marked": "^13.0.2",
