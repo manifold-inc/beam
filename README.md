@@ -6,7 +6,7 @@ an admin role for hiding posts.
 
 This is a proud fork of the original [Beam](https://github.com/planetscale/beam)
 
-<img src="src/public/images/screenshot.png" width="690" />
+<img src="public/images/screenshot.png" width="690" />
 
 ## Setup
 
