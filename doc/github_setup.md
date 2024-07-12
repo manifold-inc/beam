@@ -9,7 +9,7 @@
   - Set `AUTH_PROVIDER` to `github`
   - Set `GITHUB_ID` to the Client ID value
   - Set `GITHUB_SECRET` to the secret value generated above
-  - Set `GITHUB_ALLOWED_ORG` to the GitHub organization name your Meam members must belong to
+  - Set `GITHUB_ALLOWED_ORG` to the GitHub organization name your Beam members must belong to
   - Set `NEXTAUTH_SECRET` to a random secret. [This](https://generate-secret.now.sh/32) is a good resource.
 
 ⚠️ If you're using a GitHub OAuth app for authentication, you'll need to Request (if you're an organization member) or Grant (if you're an organization owner) access to the organization specified in `GITHUB_ALLOWED_ORG` on the GitHub authorization screen. Failure to provide access to the organization will result in an "Access Denied" error screen with the message "You do not have permission to sign in."

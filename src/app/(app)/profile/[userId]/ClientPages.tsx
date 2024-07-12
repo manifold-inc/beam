@@ -34,7 +34,7 @@ export function ProfileInfo({
   return (
     <>
       <Head>
-        <title>{user.name} - Meam</title>
+        <title>{user.name} - Beam</title>
       </Head>
 
       <div className="relative flex items-center gap-4 py-8 overflow-hidden">

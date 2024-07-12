@@ -173,7 +173,7 @@ export const User = mysqlTable(
 export const VerificationToken = mysqlTable(
   'VerificationToken',
   {
-    identifier: varchar('identifier', { length: 191 }).notNull(),
+    identifier: varchar('identifier', { length: 191 }).notNull().primaryKey(),
     token: varchar('token', { length: 191 }).notNull(),
     expires: timestamp('expires', { mode: 'date', fsp: 3 }).notNull(),
   },

@@ -1,10 +1,10 @@
-Meam is a simple tool that allows members to write posts to share across your
+Beam is a simple tool that allows members to write posts to share across your
 organization. Think of it like a lightweight internal blog. Features include a
 simple **Markdown-based** editor with preview, **image drag and drop**, comments
 and likes, **search**, a clean responsive layout with **dark mode support**, and
 an admin role for hiding posts.
 
-Meam is a fork of [Beam](https://github.com/planetscale/beam)
+This is a proud fork of the original [Beam](https://github.com/planetscale/beam)
 
 <img src="src/public/images/screenshot.png" width="690" />
 
@@ -45,14 +45,14 @@ At manifold, we just use github. Open to PR's that expand this.
 
 - [Configuring GitHub authentication](doc/github_setup.md)
 
-Meam uses [Lucia](https://lucia-auth.com/), so if you prefer to use something
+Beam uses [Lucia](https://lucia-auth.com/), so if you prefer to use something
 else, feel free to make a PR.
 
 ### Enable image uploads 
 
 Currently manditory, but we are welcome to PR's making it optional.
 
-Meam uses Uploadthing for storing uploaded images. You can
+Beam uses Uploadthing for storing uploaded images. You can
 [sign up for a free account](https://uploadthing.com/).
 
 - On your uploadthing dashboard, look for these values under your account
