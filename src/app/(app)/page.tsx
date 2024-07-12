@@ -12,40 +12,42 @@ export default async function Page({
 }: {
   searchParams: { page: string }
 }) {
-  const {user} = await validateRequest()
-  if (!user) redirect('/sign-in')
+  try {
+    const { user } = await validateRequest()
+    if (!user) redirect('/sign-in')
 
-  const currentPageNumber = Number(searchParams.page ?? '1')
-  const feedQueryInput = getQueryPaginationInput(
-    POSTS_PER_PAGE,
-    currentPageNumber
-  )
-  const feed = await serverClient.post.feed.query(feedQueryInput)
-  return (
-    <>
-      {feed.postCount === 0 ? (
-        <div className="text-center text-secondary border rounded py-20 px-10">
-          There are no published posts to show yet.
-        </div>
-      ) : (
-        <div className="flow-root">
-          <ul className="-my-12 divide-y divide-primary">
-            {feed.posts.map((post) => (
-              <li key={post.id} className="py-10">
-                <PostSummary
-                  post={post}
-                  user={user}
-                />
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      <Pagination
-        itemCount={feed.postCount}
-        itemsPerPage={POSTS_PER_PAGE}
-        currentPageNumber={currentPageNumber}
-      />
-    </>
-  )
+    const currentPageNumber = Number(searchParams.page ?? '1')
+    const feedQueryInput = getQueryPaginationInput(
+      POSTS_PER_PAGE,
+      currentPageNumber
+    )
+    const feed = await serverClient.post.feed.query(feedQueryInput)
+    return (
+      <>
+        {feed.postCount === 0 ? (
+          <div className="text-center text-secondary border rounded py-20 px-10">
+            There are no published posts to show yet.
+          </div>
+        ) : (
+          <div className="flow-root">
+            <ul className="-my-12 divide-y divide-primary">
+              {feed.posts.map((post) => (
+                <li key={post.id} className="py-10">
+                  <PostSummary post={post} user={user} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <Pagination
+          itemCount={feed.postCount}
+          itemsPerPage={POSTS_PER_PAGE}
+          currentPageNumber={currentPageNumber}
+        />
+      </>
+    )
+  } catch (e) {
+    {/* eslint-disable-next-line  */}
+    return <div>{(e as any).toString()}</div>
+  }
 }
