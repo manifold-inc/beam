@@ -1,10 +1,11 @@
 import { validateRequest } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { ProfileInfo } from './ClientPages'
-import { serverClient } from 'trpc/server'
 import { getQueryPaginationInput } from '@/server/utils'
 import { Pagination } from '@/components/pagination'
 import { PostSummary } from '@/components/post-summary'
+import { createCaller } from '@/server/routers/_app'
+import { db } from '@/lib/db'
 
 const POSTS_PER_PAGE = 20
 export const revalidate = 0
@@ -15,13 +16,24 @@ export default async function ProfilePage({
   params: { userId: string }
   searchParams: { page: string }
 }) {
-  const { user } = await validateRequest()
+  const { user, session } = await validateRequest()
   if (!user) redirect('/sign-in')
-  const profile = await serverClient.user.profile.query({ id: params.userId })
-  const feed = await serverClient.post.feed.query({
-    authorId: params.userId,
-    ...getQueryPaginationInput(POSTS_PER_PAGE, Number(searchParams.page ?? 1)),
+
+  const caller = createCaller({
+    db,
+    user,
+    session,
   })
+  const [profile, feed] = await Promise.all([
+    caller.user.profile({ id: params.userId }),
+    caller.post.feed({
+      authorId: params.userId,
+      ...getQueryPaginationInput(
+        POSTS_PER_PAGE,
+        Number(searchParams.page ?? 1)
+      ),
+    }),
+  ])
   return (
     <>
       <ProfileInfo user={profile} isSelf={profile.id === user.id} />

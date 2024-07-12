@@ -1,4 +1,4 @@
-import { createTRPCRouter } from '../context'
+import { createCallerFactory, createTRPCRouter } from '../context'
 import { commentRouter } from './comment'
 import { postRouter } from './post'
 import { userRouter } from './user'
@@ -10,3 +10,4 @@ export const appRouter = createTRPCRouter({
 })
 
 export type AppRouter = typeof appRouter
+export const createCaller = createCallerFactory(appRouter);

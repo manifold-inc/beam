@@ -4,13 +4,10 @@ import { db } from '@/lib/db'
 import superjson from "superjson";
 import { ZodError } from 'zod';
 
-export const createContext = async ({
-  req,
-}: {req: Request}) => {
+export const createContext = async () => {
   const {user, session} = await validateRequest()
   if(!user || !session) throw new TRPCError({code: "UNAUTHORIZED"})
   return {
-    req,
     db,
     user,
     session,
@@ -32,4 +29,5 @@ const t = initTRPC.context<typeof createContext>().create({
 });
 
 export const createTRPCRouter = t.router;
+export const createCallerFactory = t.createCallerFactory
 export const procedure = t.procedure
