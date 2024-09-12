@@ -115,7 +115,6 @@ export function PostPage({id, user, initialData}: {id: string, user: User, initi
 
   if (postQuery.data) {
     const isUserAdmin = user.role === 'ADMIN'
-    const postBelongsToUser = postQuery.data.post.author.id === user.id
 
     return (
       <>
@@ -135,7 +134,7 @@ export function PostPage({id, user, initialData}: {id: string, user: User, initi
               <h1 className="text-3xl font-semibold tracking-tighter md:text-4xl">
                 {postQuery.data.post.title}
               </h1>
-              {(postBelongsToUser || isUserAdmin) && (
+              {(
                 <>
                   <div className="flex md:hidden">
                     <Menu>
@@ -159,7 +158,7 @@ export function PostPage({id, user, initialData}: {id: string, user: User, initi
                                 Hide
                               </MenuItemButton>
                             ))}
-                          {postBelongsToUser && (
+                          {(
                             <>
                               <MenuItemButton onClick={handleEdit}>
                                 Edit
@@ -195,7 +194,7 @@ export function PostPage({id, user, initialData}: {id: string, user: User, initi
                           <EyeClosedIcon className="w-4 h-4" />
                         </IconButton>
                       ))}
-                    {postBelongsToUser && (
+                    {(
                       <>
                         <IconButton
                           variant="secondary"

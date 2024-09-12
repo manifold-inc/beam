@@ -13,18 +13,18 @@ export function EditPage({ id, user }: { id: string; user: User }) {
     onError: (error) => {
       toast.error(`Something went wrong: ${error.message}`)
     },
+    onSuccess: () => {
+      toast.success(user.name + " edited successfully")
+    }
   })
 
   if (postQuery.data) {
-    const postBelongsToUser = postQuery.data.post.author.id === user.id
-
     return (
       <>
         <Head>
           <title>Edit {postQuery.data.post.title} - Beafold</title>
         </Head>
 
-        {postBelongsToUser ? (
           <>
             <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
               Edit &quot;{postQuery.data.post.title}&quot;
@@ -53,9 +53,6 @@ export function EditPage({ id, user }: { id: string; user: User }) {
               />
             </div>
           </>
-        ) : (
-          <div>You don&apos;t have permissions to edit this post.</div>
-        )}
       </>
     )
   }

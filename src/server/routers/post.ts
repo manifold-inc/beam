@@ -185,17 +185,6 @@ export const postRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, data } = input
 
-      const [post] = await ctx.db
-        .select({ authorId: Post.authorId })
-        .from(Post)
-        .where(eq(Post.id, id))
-
-      const postBelongsToUser = post?.authorId === ctx.user.id
-
-      if (!postBelongsToUser) {
-        throw new TRPCError({ code: 'FORBIDDEN' })
-      }
-
       await ctx.db
         .update(Post)
         .set({
